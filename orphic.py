@@ -13,6 +13,8 @@ FUNC_DEF_REGEX = re.compile(
 # This regex detects a function call
 FUNC_CALL_REGEX = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)\s*\(")
 
+NUMBER_OF_LINES_REMOVED = 0
+
 def remove_comments(text):
 	"""
 	Removes C-style comments (both block and line comments) from the given text.
@@ -144,23 +146,13 @@ def print_function_location(func_name, locations):
 		# Print function location with colorized file path
 		print(f"\033[92m{func_name:25}\033[0m | {file_color}{path:30}\033[0m line: \033[91m{line}\033[0m")
 
-def main():
-	parser = argparse.ArgumentParser(
-		description="Scan one or more directories or files for C function definitions and calls."
-	)
-	parser.add_argument(
-		"sources",
-		nargs="+",
-		help="One or more directories or .c/.h files to scan."
-	)
-	args = parser.parse_args()
-
+def main(paths):
 	# If no sources are provided (shouldn't happen with nargs="+"), exit.
-	if not args.sources:
+	if not paths:
 		print("No input paths provided. Exiting.")
 		return
 
-	definitions, calls = scan_inputs(args.sources)
+	definitions, calls = scan_inputs(paths)
 
 	# Display defined functions in a clean table format.
 	print_header("Defined Functions")
@@ -199,4 +191,9 @@ def main():
 	print("\n")
 
 if __name__ == "__main__":
-	main()
+
+	parser = argparse.ArgumentParser(description="Scan C source code for function definitions and calls.")
+	parser.add_argument("paths", nargs="+", help="File or directory paths to scan.")
+	args = parser.parse_args()
+
+	main(args.paths)
