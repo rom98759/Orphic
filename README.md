@@ -3,6 +3,8 @@
 **Orphic** is a lightweight Python tool designed to detect orphan (unused) functions in C projects.
 By scanning directories or individual source files, Orphic extracts function definitions (with file paths and line numbers) and identifies which functions are never called. This helps developers clean up their code, remove dead code, and maintain a lean, efficient codebase.
 
+**Orphic** is named to evoke the idea of "orphaned" functions—those pieces of code left unused in your project. Clean up your codebase and make maintenance easier with Orphic!
+
 ---
 
 ## Features
@@ -52,11 +54,28 @@ python orphic.py srcs includes
 
 ---
 
+## Alias
+
+To quickly add an alias:
+
+1. Open your configuration file (e.g., `~/.bashrc` or `~/.zshrc`).
+2. Add the following line (replacing the path with the full path to your script):
+
+  ```bash
+  alias orphic='python /path/to/orphic.py'
+  ```
+
+3. Reload the configuration:
+
+  ```bash
+  source ~/.bashrc
+  ```
+
+---
+
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests to help improve Orphic.
 
 ---
 
-
-**Orphic** is named to evoke the idea of "orphaned" functions—those pieces of code left unused in your project. Clean up your codebase and make maintenance easier with Orphic!
