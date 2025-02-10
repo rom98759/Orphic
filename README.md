@@ -22,8 +22,7 @@ By scanning directories or individual source files, Orphic extracts function def
 - **Flexible Input:**
   Supports scanning multiple directories and/or files passed as command-line arguments.
 
-- **Colorized Output:**
-  Enhances readability of the output in the terminal.
+![example](image.png)
 
 ---
 
