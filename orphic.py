@@ -130,9 +130,19 @@ def print_header(title, width=80):
 def print_function_location(func_name, locations):
 	"""
 	Prints the function name and its locations in a formatted manner with colors.
+	Files with .c extensions are shown in blue, while .h files are shown in yellow.
 	"""
 	for path, line in locations:
-		print(f"\033[92m{func_name:25}\033[0m | \033[93m{path:30}\033[0m line: \033[91m{line}\033[0m")
+		# Colorize the file path based on extension
+		if path.endswith(".c"):
+			file_color = "\033[94m"  # Blue for .c files
+		elif path.endswith(".h"):
+			file_color = "\033[93m"  # Yellow for .h files
+		else:
+			file_color = "\033[0m"  # No color for other files
+
+		# Print function location with colorized file path
+		print(f"\033[92m{func_name:25}\033[0m | {file_color}{path:30}\033[0m line: \033[91m{line}\033[0m")
 
 def main():
 	parser = argparse.ArgumentParser(
