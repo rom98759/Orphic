@@ -5,9 +5,9 @@ import argparse
 # Regular expressions
 # This regex detects a typical function definition (note: simplified)
 FUNC_DEF_REGEX = re.compile(
-    r"^\s*(?!if\s*\(|while\s*\(|for\s*\(|switch\s*\(|return\s*\(|sizeof\s*\(|case\s*\(|default\s*\(|else\s+if\s*\()"
-    r"(?:[a-zA-Z_][a-zA-Z0-9_]*\s+)+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(",
-    re.MULTILINE
+	r"^\s*(?!if\s*\(|while\s*\(|for\s*\(|switch\s*\(|return\s*\(|sizeof\s*\(|case\s*\(|default\s*\(|else\s+if\s*\()"
+	r"(?:[a-zA-Z_][a-zA-Z0-9_]*\s+)+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(",
+	re.MULTILINE
 )
 
 # This regex detects a function call
