@@ -2,18 +2,33 @@ import os
 import re
 import argparse
 
-# Regular expressions
-# This regex detects a typical function definition (note: simplified)
+EXCLUDED_FUNCTIONS = {
+	"main", "auto", "else", "long", "switch", "break", "enum", "register", "typedef",
+	"case", "extern", "return", "union", "char", "float", "short", "unsigned",
+	"const", "for", "signed", "void", "continue", "goto", "sizeof", "volatile",
+	"default", "if", "static", "while", "do", "int", "struct", "_Packed", "double"
+}
+
+# Construit le pattern des mots exclus séparés par "|" (attention aux caractères spéciaux)
+excluded_pattern = "|".join(EXCLUDED_FUNCTIONS)
+
 FUNC_DEF_REGEX = re.compile(
-	r"^\s*(?!if\s*\(|while\s*\(|for\s*\(|switch\s*\(|return\s*\(|sizeof\s*\(|case\s*\(|default\s*\(|else\s+if\s*\()"
-	r"(?:[a-zA-Z_][a-zA-Z0-9_]*\s+)+\**([a-zA-Z_][a-zA-Z0-9_]*)\s*\(",
-	re.MULTILINE
+	r"(?m)^"                              # début de ligne en mode multiligne
+	r"\s*"                                # espaces ou tabulations optionnels
+	r"(?!if\b|while\b|for\b|switch\b|return\b|sizeof\b|case\b|default\b|else\s+if\b)"  # ne pas commencer par un mot exclu
+	r"(?:(?:[a-zA-Z_][a-zA-Z0-9_]*\s+)+\**)"  # type de retour (un ou plusieurs mots éventuellement avec *) suivi d'espaces
+	r"([a-zA-Z_][a-zA-Z0-9_]*)"            # capture le nom de la fonction
+	r"\s*\("                              # espace optionnel avant la parenthèse ouvrante
+	r"[^;]*"                              # tous les caractères jusqu'à la parenthèse fermante, en s'assurant qu'il n'y ait pas de ; dans cette zone
+	r"\)\s*"                              # fermeture de la parenthèse et espaces optionnels
+	r"(?=\{)"                             # lookahead positif : doit être suivi d'un { (donc définition réelle)
 )
 
-# This regex detects a function call
-FUNC_CALL_REGEX = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)\s*\(")
-
-NUMBER_OF_LINES_REMOVED = 0
+# Pour les appels de fonctions, on peut conserver quelque chose de similaire :
+FUNC_CALL_REGEX = re.compile(
+	r"\b(?!(?:" + excluded_pattern + r")\b)([a-zA-Z_][a-zA-Z0-9_]*)\s*\(",
+	re.MULTILINE
+)
 
 def remove_comments(text):
 	"""
@@ -145,13 +160,6 @@ def print_function_location(func_name, locations):
 
 		# Print function location with colorized file path
 		print(f"\033[92m{func_name:25}\033[0m | {file_color}{path:30}\033[0m line: \033[91m{line}\033[0m")
-
-EXCLUDED_FUNCTIONS = {
-	"main", "auto", "else", "long", "switch", "break", "enum", "register", "typedef",
-	"case", "extern", "return", "union", "char", "float", "short", "unsigned",
-	"const", "for", "signed", "void", "continue", "goto", "sizeof", "volatile",
-	"default", "if", "static", "while", "do", "int", "struct", "_Packed", "double"
-}
 
 def main(paths):
 	# If no sources are provided (shouldn't happen with nargs="+"), exit.
