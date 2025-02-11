@@ -224,6 +224,17 @@ def main(paths):
 		print("All functions are used!")
 	print("\n")
 
+	# Identify undefined functions
+	undefined = calls - set(definitions.keys()) - EXCLUDED_FUNCTIONS
+
+	print_header("Undefined Functions")
+	if undefined:
+		for func in sorted(undefined):
+			print("\033[91m" + func + "\033[0m")
+	else:
+		print("No undefined functions found.")
+	print("\n")
+
 	if DEBUG:
 		print_header("Debug Information")
 		for path in paths:
