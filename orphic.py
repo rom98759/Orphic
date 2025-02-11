@@ -146,6 +146,13 @@ def print_function_location(func_name, locations):
 		# Print function location with colorized file path
 		print(f"\033[92m{func_name:25}\033[0m | {file_color}{path:30}\033[0m line: \033[91m{line}\033[0m")
 
+EXCLUDED_FUNCTIONS = {
+	"main", "auto", "else", "long", "switch", "break", "enum", "register", "typedef",
+	"case", "extern", "return", "union", "char", "float", "short", "unsigned",
+	"const", "for", "signed", "void", "continue", "goto", "sizeof", "volatile",
+	"default", "if", "static", "while", "do", "int", "struct", "_Packed", "double"
+}
+
 def main(paths):
 	# If no sources are provided (shouldn't happen with nargs="+"), exit.
 	if not paths:
@@ -169,14 +176,15 @@ def main(paths):
 	print_header("Called Functions")
 	if calls:
 		for func in sorted(calls):
-			print("\033[92m" + func + "\033[0m")
+			if func not in EXCLUDED_FUNCTIONS:
+				print("\033[92m" + func + "\033[0m")
 	else:
 		print("No function calls found.")
 
-	# Identify unused functions (excluding 'main' since it's called by the runtime)
+	# Identify unused functions (excluding certain keywords)
 	unused = {}
 	for func_name, locations in definitions.items():
-		if func_name not in calls and func_name != "main":
+		if func_name not in calls and func_name not in EXCLUDED_FUNCTIONS:
 			unused[func_name] = locations
 
 	print("\n")
