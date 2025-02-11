@@ -2,6 +2,8 @@ import os
 import re
 import argparse
 
+DEBUG = False
+
 EXCLUDED_FUNCTIONS = {
 	"main", "auto", "else", "long", "switch", "break", "enum", "register", "typedef",
 	"case", "extern", "return", "union", "char", "float", "short", "unsigned",
@@ -30,6 +32,10 @@ FUNC_CALL_REGEX = re.compile(
 	re.MULTILINE
 )
 
+def debug_print(message):
+	if DEBUG:
+		print(f"\033[93m[DEBUG]\033[0m {message}\n")
+
 def remove_comments(text):
 	"""
 	Removes C-style comments (both block and line comments) from the given text.
@@ -57,11 +63,13 @@ def find_function_definitions_in_file(filepath):
 	content = remove_comments(content)
 
 	# Use finditer to capture the function name and its position.
+	debug_print(f"Scanning for definitions in {filepath}")
 	for match in FUNC_DEF_REGEX.finditer(content):
 		function_name = match.group(1)
 		# Calculate the line number by counting the newlines before the match.
 		line_number = content[:match.start()].count("\n") + 1
 		definitions.append((function_name, line_number, filepath))
+		debug_print(f"Found definition: \033[92m{function_name}\033[0m at line \033[91m{line_number}\033[0m")
 	return definitions
 
 def find_function_calls_in_file(filepath):
@@ -80,7 +88,11 @@ def find_function_calls_in_file(filepath):
 	content = remove_comments(content)
 	# Remove function definitions so that signatures are not counted as calls.
 	content_without_defs = FUNC_DEF_REGEX.sub("", content)
-	return set(FUNC_CALL_REGEX.findall(content_without_defs))
+	debug_print(f"Scanning for calls in {filepath}")
+	calls = set(FUNC_CALL_REGEX.findall(content_without_defs))
+	for call in calls:
+		debug_print(f"Found call: \033[92m{call}\033[0m")
+	return calls
 
 def scan_path(path):
 	"""
@@ -102,17 +114,23 @@ def scan_path(path):
 			for file in files:
 				if file.endswith(".c") or file.endswith(".h"):
 					filepath = os.path.join(root, file)
+					debug_print(f"Processing file: \033[94m{filepath}\033[0m")
 					file_defs = find_function_definitions_in_file(filepath)
 					for func_name, line_number, fpath in file_defs:
 						definitions.setdefault(func_name, []).append((fpath, line_number))
 					file_calls = find_function_calls_in_file(filepath)
 					calls.update(file_calls)
+					if DEBUG:
+						debug_print(f"File \033[94m{filepath}\033[0m has \033[92m{len(file_defs)}\033[0m definitions and \033[92m{len(file_calls)}\033[0m calls")
 	elif os.path.isfile(path) and (path.endswith(".c") or path.endswith(".h")):
+		debug_print(f"Processing file: \033[94m{path}\033[0m")
 		file_defs = find_function_definitions_in_file(path)
 		for func_name, line_number, fpath in file_defs:
 			definitions.setdefault(func_name, []).append((fpath, line_number))
 		file_calls = find_function_calls_in_file(path)
 		calls.update(file_calls)
+		if DEBUG:
+			debug_print(f"File \033[94m{path}\033[0m has \033[92m{len(file_defs)}\033[0m definitions and \033[92m{len(file_calls)}\033[0m calls")
 	else:
 		print(f"Skipping '{path}': Not a .c or .h file or directory.")
 
@@ -206,10 +224,21 @@ def main(paths):
 		print("All functions are used!")
 	print("\n")
 
-if __name__ == "__main__":
+	if DEBUG:
+		print_header("Debug Information")
+		for path in paths:
+			print(f"Scanned: \033[94m{path}\033[0m")
+		for func_name, locations in definitions.items():
+			debug_print(f"Defined function: \033[92m{func_name}\033[0m at {locations}")
+		for call in calls:
+			debug_print(f"Function call: \033[92m{call}\033[0m")
 
+if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Scan C source code for function definitions and calls.")
 	parser.add_argument("paths", nargs="+", help="File or directory paths to scan.")
+	parser.add_argument("-D", "--debug", action="store_true", help="Enable debug mode.")
 	args = parser.parse_args()
+
+	DEBUG = args.debug
 
 	main(args.paths)
